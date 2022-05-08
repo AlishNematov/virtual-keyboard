@@ -525,7 +525,7 @@ function addSubctring(key) {
     textarea.setSelectionRange(start + 1, start + 1);
   } else if (start === valueLength) {
     textarea.value += key;
-    textarea.setSelectionRange(valueLength, valueLength);
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
   }
 }
 
@@ -629,9 +629,49 @@ function addActionKeyUp(event) {
   }
 }
 
+function addActionMouseDown(event) {
+  if (event.target.type === 'button') {
+    const text = event.target.innerText;
+    document.querySelector(`#${event.target.id}`).classList.add('keyboard__key_active', 'keyboard__key_click');
+    if (event.target.innerText.length === 1) {
+      addSubctring(text);
+    } else if (text === 'Tab') {
+      addSubctring('\t');
+    } else if (text === 'Backspace') {
+      deleteSubstring('Backspace');
+    } else if (text === 'Del') {
+      deleteSubstring('Delete');
+    } else if (text === 'CapsLock') {
+      // some code
+    } else if (text === 'Shift') {
+      modifyKeyboardShiftDown(event);
+    } else if (text === 'LeftCtrl' || text === 'RightCtrl') {
+      // some code
+    } else if (text === 'Alt') {
+      if (event.shifKey) {
+        changeKeyboardLayout();
+      }
+    } else if (text === 'Enter') {
+      addSubctring('\n');
+    } else if (event.target.id === 'Language') {
+      changeKeyboardLayout();
+    }
+  }
+}
+
+function addActionMouseUp(event) {
+  if (event.target.innerText === 'Shift') {
+    // some code
+  } else {
+    document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(createMainElements(MAIN_ELEMENTS));
   createKeyboardElements(KEYBOARD, getLanguage());
   document.addEventListener('keydown', addActionKeyDown);
   document.addEventListener('keyup', addActionKeyUp);
+  document.querySelector('.keyboard').addEventListener('mousedown', addActionMouseDown);
+  document.querySelector('.keyboard').addEventListener('mouseup', addActionMouseUp);
 });
