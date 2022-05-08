@@ -510,7 +510,128 @@ function getLanguage() {
   return localStorage.getItem('virtual_keyboard.language');
 }
 
+function getCursorPosition() {
+  const startPosition = document.querySelector('.textarea').selectionStart;
+  const endPosition = document.querySelector('.textarea').selectionEnd;
+  return [startPosition, endPosition];
+}
+
+function addSubctring(key) {
+  const textarea = document.querySelector('.textarea');
+  const valueLength = textarea.value.length;
+  const [start, end] = getCursorPosition();
+  if (start !== valueLength) {
+    textarea.value = textarea.value.slice(0, start) + key + textarea.value.slice(end, valueLength);
+    textarea.setSelectionRange(start + 1, start + 1);
+  } else if (start === valueLength) {
+    textarea.value += key;
+    textarea.setSelectionRange(valueLength, valueLength);
+  }
+}
+
+function deleteSubstring(typeButton) {
+  const textarea = document.querySelector('.textarea');
+  let [start, end] = getCursorPosition();
+  if (typeButton === 'Delete' && start === end) {
+    end += 1;
+  } else if (typeButton !== 'Delete' && start === end) {
+    start -= 1;
+  }
+  const text = textarea.value.split('');
+  text.splice(start, end - start);
+  textarea.value = text.join('');
+  textarea.setSelectionRange(start, start);
+}
+
+function setLanguage(language) {
+  localStorage.setItem('virtual_keyboard.language', language);
+  return localStorage.getItem('virtual_keyboard.language');
+}
+
+function changeKeyboardLayout() {
+  const language = getLanguage() === 'Ru' ? setLanguage('En') : setLanguage('Ru');
+  Object.values(KEYBOARD).forEach((keyboardItem) => {
+    keyboardItem.forEach((element) => {
+      if (element.changeable) {
+        [document.querySelector(`#${element.keyCode}`).innerText] = element[`key${language}`];
+      }
+    });
+  });
+}
+
+function modifyKeyboardShiftDown(event) {
+  if (event.altKey) {
+    changeKeyboardLayout();
+  } else {
+    const language = getLanguage();
+    Object.values(KEYBOARD).forEach((keyboardItem) => {
+      keyboardItem.forEach((item) => {
+        if (item.changeable) {
+          [, document.querySelector(`#${item.keyCode}`).innerText] = item[`key${language}`];
+        }
+      });
+    });
+  }
+}
+
+function modifyKeyboardShiftUp(event) {
+  if (event.altKey) {
+    // Some action
+  } else {
+    const language = getLanguage();
+    Object.values(KEYBOARD).forEach((keyboardItem) => {
+      keyboardItem.forEach((item) => {
+        if (item.changeable) {
+          [document.querySelector(`#${item.keyCode}`).innerText] = item[`key${language}`];
+        }
+      });
+    });
+  }
+}
+
+function addActionKeyDown(event) {
+  document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
+  if (event.key.length === 1 || event.key === 'Space') {
+    event.preventDefault();
+    addSubctring(event.key);
+  } else if (event.key === 'Tab') {
+    event.preventDefault();
+    addSubctring('\t');
+  } else if (event.key === 'Backspace') {
+    event.preventDefault();
+    deleteSubstring('Backspace');
+  } else if (event.key === 'Delete') {
+    event.preventDefault();
+    deleteSubstring('Delete');
+  } else if (event.key === 'CapsLock') {
+    event.preventDefault();
+  } else if (event.key === 'Shift') {
+    event.preventDefault();
+    modifyKeyboardShiftDown(event);
+  } else if (event.key === 'LeftCtrl' || event.key === 'RightCtrl') {
+    event.preventDefault();
+  } else if (event.key === 'Alt') {
+    event.preventDefault();
+    if (event.shifKey) {
+      changeKeyboardLayout();
+    }
+  } else if (event.key === 'Enter') {
+    event.preventDefault();
+    addSubctring('\n');
+  }
+}
+
+function addActionKeyUp(event) {
+  document.querySelector(`#${event.code}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+  if (event.key === 'Shift') {
+    event.preventDefault();
+    modifyKeyboardShiftUp(event);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(createMainElements(MAIN_ELEMENTS));
   createKeyboardElements(KEYBOARD, getLanguage());
+  document.addEventListener('keydown', addActionKeyDown);
+  document.addEventListener('keyup', addActionKeyUp);
 });
