@@ -662,17 +662,15 @@ function addActionMouseDown(event) {
   if (event.target.type === 'button') {
     const text = event.target.innerText;
     document.querySelector('.textarea').focus();
-    setFocusPosition ();
-    let position = [Number(localStorage.getItem('virtual_keyboard.start')), Number(localStorage.getItem('virtual_keyboard.end'))];
     document.querySelector(`#${event.target.id}`).classList.add('keyboard__key_active', 'keyboard__key_click');
     if (event.target.innerText.length === 1) {
-        addSubctring(text, position);
+        addSubctring(text, getCursorPosition());
     } else if (text === 'Tab') {
-        addSubctring('\t', position);
+        addSubctring('\t', getCursorPosition());
     } else if (text === 'Backspace') {
-        deleteSubstring('Backspace', position);
-    } else if (text === 'Del') {
-        deleteSubstring('Delete', position);
+        deleteSubstring('Backspace', getCursorPosition());
+    } else if (text === 'Delete') {
+        deleteSubstring('Delete', getCursorPosition());
     } else if (text === 'CapsLock') {
         changeCase(getCapsLock());
     } else if (text === 'Shift') {
@@ -701,12 +699,6 @@ function addActionMouseUp(event) {
   }
 }
 
-function setFocusPosition () {
-    console.log(localStorage)
-    localStorage.setItem('virtual_keyboard.start', document.querySelector('.textarea').selectionStart);
-    localStorage.setItem('virtual_keyboard.end', document.querySelector('.textarea').selectionEnd);
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   document.body.appendChild(createMainElements(MAIN_ELEMENTS));
   createKeyboardElements(KEYBOARD, getLanguage());
@@ -715,5 +707,4 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.keyboard').addEventListener('mousedown', addActionMouseDown);
   document.querySelector('.keyboard').addEventListener('mouseup', addActionMouseUp);
   document.addEventListener('mousemove', setCapsLock);
-  document.querySelector('.textarea').addEventListener('focusout', setFocusPosition)
 });
