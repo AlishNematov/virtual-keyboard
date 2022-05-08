@@ -147,4 +147,9 @@ h1, h2 {
 
 .attention {
     color: $button-active-color;
+
+    &_disable {
+        visibility: hidden;
+    }
+    
 }

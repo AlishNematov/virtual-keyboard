@@ -409,8 +409,8 @@ const KEYBOARD = {
         displayableText: false,
         changeable: true,
         keyCode: 'Language',
-        keyEn: ['En', 'En'],
-        keyRu: ['Ru', 'Ru'],
+        keyEn: ['EN', 'EN'],
+        keyRu: ['RU', 'RU'],
       },
       {
         displayableText: false,
@@ -503,11 +503,24 @@ function createKeyboardElements(keyboardArray, language = 'En') {
 
 function getLanguage() {
   if (localStorage.getItem('virtual_keyboard.language')) {
-    localStorage.getItem('virtual_keyboard.language');
+    return localStorage.getItem('virtual_keyboard.language');
   } else {
-    localStorage.setItem('virtual_keyboard.language');
+    localStorage.setItem('virtual_keyboard.language', "En");
   }
   return localStorage.getItem('virtual_keyboard.language');
+}
+
+function setCapsLock(event) {
+    localStorage.setItem('virtual_keyboard.capsLock', event.getModifierState("CapsLock") ? 1 : 0);
+    if(event.getModifierState("CapsLock")) {
+        document.querySelector(".attention").classList.remove('attention_disable');
+    } else {
+        document.querySelector(".attention").classList.add('attention_disable')
+    }
+}
+
+function getCapsLock() {
+    return Number(localStorage.getItem('virtual_keyboard.capsLock'));
 }
 
 function getCursorPosition() {
@@ -516,22 +529,24 @@ function getCursorPosition() {
   return [startPosition, endPosition];
 }
 
-function addSubctring(key) {
+function addSubctring(key, position) {
   const textarea = document.querySelector('.textarea');
   const valueLength = textarea.value.length;
-  const [start, end] = getCursorPosition();
+  const [start, end] = position;
   if (start !== valueLength) {
     textarea.value = textarea.value.slice(0, start) + key + textarea.value.slice(end, valueLength);
-    textarea.setSelectionRange(start + 1, start + 1);
+    textarea.setSelectionRange(start+1, start+1);
+    localStorage.setItem('virtual_keyboard.start', start+1);
+    localStorage.setItem('virtual_keyboard.end', end+1);
   } else if (start === valueLength) {
     textarea.value += key;
     textarea.setSelectionRange(textarea.value.length, textarea.value.length);
   }
 }
 
-function deleteSubstring(typeButton) {
+function deleteSubstring(typeButton, position) {
   const textarea = document.querySelector('.textarea');
-  let [start, end] = getCursorPosition();
+  let [start, end] = position;
   if (typeButton === 'Delete' && start === end) {
     end += 1;
   } else if (typeButton !== 'Delete' && start === end) {
@@ -589,22 +604,34 @@ function modifyKeyboardShiftUp(event) {
   }
 }
 
+function changeCase(bool) {
+    const language = getLanguage();
+    Object.values(KEYBOARD).forEach((keyboardItem) => {
+      keyboardItem.forEach((item) => {
+        if (item.changeable) {
+          document.querySelector(`#${item.keyCode}`).innerText = bool === 1 ? item[`key${language}`][0].toUpperCase() : item[`key${language}`][0].toLowerCase();
+        }
+      });
+    });
+}
+
 function addActionKeyDown(event) {
   document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
   if (event.key.length === 1 || event.key === 'Space') {
     event.preventDefault();
-    addSubctring(event.key);
+    addSubctring(event.key, getCursorPosition());
   } else if (event.key === 'Tab') {
     event.preventDefault();
-    addSubctring('\t');
+    addSubctring('\t', getCursorPosition());
   } else if (event.key === 'Backspace') {
     event.preventDefault();
-    deleteSubstring('Backspace');
+    deleteSubstring('Backspace', getCursorPosition());
   } else if (event.key === 'Delete') {
     event.preventDefault();
-    deleteSubstring('Delete');
+    deleteSubstring('Delete', getCursorPosition());
   } else if (event.key === 'CapsLock') {
     event.preventDefault();
+    changeCase(getCapsLock());
   } else if (event.key === 'Shift') {
     event.preventDefault();
     modifyKeyboardShiftDown(event);
@@ -617,7 +644,7 @@ function addActionKeyDown(event) {
     }
   } else if (event.key === 'Enter') {
     event.preventDefault();
-    addSubctring('\n');
+    addSubctring('\n', getCursorPosition());
   }
 }
 
@@ -626,25 +653,30 @@ function addActionKeyUp(event) {
   if (event.key === 'Shift') {
     event.preventDefault();
     modifyKeyboardShiftUp(event);
+  } else if (event.key === 'CapsLock') {
+    setCapsLock(event);
   }
 }
 
 function addActionMouseDown(event) {
   if (event.target.type === 'button') {
     const text = event.target.innerText;
+    document.querySelector('.textarea').focus();
+    setFocusPosition ();
+    let position = [Number(localStorage.getItem('virtual_keyboard.start')), Number(localStorage.getItem('virtual_keyboard.end'))];
     document.querySelector(`#${event.target.id}`).classList.add('keyboard__key_active', 'keyboard__key_click');
     if (event.target.innerText.length === 1) {
-      addSubctring(text);
+        addSubctring(text, position);
     } else if (text === 'Tab') {
-      addSubctring('\t');
+        addSubctring('\t', position);
     } else if (text === 'Backspace') {
-      deleteSubstring('Backspace');
+        deleteSubstring('Backspace', position);
     } else if (text === 'Del') {
-      deleteSubstring('Delete');
+        deleteSubstring('Delete', position);
     } else if (text === 'CapsLock') {
-      // some code
+        changeCase(getCapsLock());
     } else if (text === 'Shift') {
-      modifyKeyboardShiftDown(event);
+        modifyKeyboardShiftDown(event);
     } else if (text === 'LeftCtrl' || text === 'RightCtrl') {
       // some code
     } else if (text === 'Alt') {
@@ -652,7 +684,7 @@ function addActionMouseDown(event) {
         changeKeyboardLayout();
       }
     } else if (text === 'Enter') {
-      addSubctring('\n');
+      addSubctring('\n', position);
     } else if (event.target.id === 'Language') {
       changeKeyboardLayout();
     }
@@ -662,9 +694,17 @@ function addActionMouseDown(event) {
 function addActionMouseUp(event) {
   if (event.target.innerText === 'Shift') {
     // some code
+  } else if (event.target.innerText === 'CapsLock') {
+    setCapsLock(event);
   } else {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
   }
+}
+
+function setFocusPosition () {
+    console.log(localStorage)
+    localStorage.setItem('virtual_keyboard.start', document.querySelector('.textarea').selectionStart);
+    localStorage.setItem('virtual_keyboard.end', document.querySelector('.textarea').selectionEnd);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -674,4 +714,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keyup', addActionKeyUp);
   document.querySelector('.keyboard').addEventListener('mousedown', addActionMouseDown);
   document.querySelector('.keyboard').addEventListener('mouseup', addActionMouseUp);
+  document.addEventListener('mousemove', setCapsLock);
+  document.querySelector('.textarea').addEventListener('focusout', setFocusPosition)
 });
