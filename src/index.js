@@ -756,19 +756,29 @@ function addActionMouseDown(event) {
 }
 
 function addActionMouseUp(event) {
-  document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
-  document.querySelector('.textarea').focus();
-  if (event.target.innerText === 'Shift') {
-    modifyKeyboardShiftUp(event, getCapsLock());
-  } else if (event.target.innerText === 'CapsLock') {
+  if (event.target.type === 'button') {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
-    if (getCapsLock()) {
-      document.querySelector('.attention').classList.remove('attention_disable');
+    document.querySelector('.textarea').focus();
+    if (event.target.innerText === 'Shift') {
+      modifyKeyboardShiftUp(event, getCapsLock());
+    } else if (event.target.innerText === 'CapsLock') {
+      document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+      if (getCapsLock()) {
+        document.querySelector('.attention').classList.remove('attention_disable');
+      } else {
+        document.querySelector('.attention').classList.add('attention_disable');
+      }
     } else {
-      document.querySelector('.attention').classList.add('attention_disable');
+      document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
     }
   } else {
-    document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+    Object.values(KEYBOARD).forEach((keyboardItem) => {
+      keyboardItem.forEach((item) => {
+        if (document.querySelector(`#${item.keyCode}`) !== 'CapsLock') {
+          document.querySelector(`#${item.keyCode}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+        }
+      });
+    });
   }
 }
 
