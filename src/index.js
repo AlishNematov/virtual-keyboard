@@ -558,39 +558,50 @@ function changeKeyboardLayout() {
   Object.values(KEYBOARD).forEach((keyboardItem) => {
     keyboardItem.forEach((element) => {
       if (element.changeable) {
-        [document.querySelector(`#${element.keyCode}`).innerText] = element[`key${language}`];
+        if (getCapsLock()) {
+            document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toUpperCase();
+        } else {
+            document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toLowerCase();
+        }
       }
     });
   });
+  document.querySelector('#Language').innerText = language.toUpperCase();
 }
 
-function modifyKeyboardShiftDown(event) {
+function modifyKeyboardShiftDown(event, bool) {
   if (event.altKey) {
     changeKeyboardLayout();
   } else {
     const language = getLanguage();
     Object.values(KEYBOARD).forEach((keyboardItem) => {
       keyboardItem.forEach((item) => {
-        if (item.changeable) {
-          [, document.querySelector(`#${item.keyCode}`).innerText] = item[`key${language}`];
+        if (item.changeable && bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
+          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][1].toLowerCase();
+        } else if (item.changeable && !bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
+            document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][1].toUpperCase();
         }
       });
     });
+    document.querySelector('#Language').innerText = language.toUpperCase();
   }
 }
 
-function modifyKeyboardShiftUp(event) {
+function modifyKeyboardShiftUp(event, bool) {
   if (event.altKey) {
     // Some action
   } else {
     const language = getLanguage();
     Object.values(KEYBOARD).forEach((keyboardItem) => {
       keyboardItem.forEach((item) => {
-        if (item.changeable) {
-          [document.querySelector(`#${item.keyCode}`).innerText] = item[`key${language}`];
-        }
+        if (item.changeable && bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
+            document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
+          } else if (item.changeable && !bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
+              document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
+          }
       });
     });
+    document.querySelector('#Language').innerText = language.toUpperCase();
   }
 }
 
@@ -599,11 +610,9 @@ function changeCase(bool) {
   const language = getLanguage();
   Object.values(KEYBOARD).forEach((keyboardItem) => {
     keyboardItem.forEach((item) => {
-      if (item.changeable && bool === 1) {
+      if (item.changeable && bool === 1 && item.keyCode !== 'Language') {
         document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
-      } else if (item.changeable && bool === 0) {
-          console.log('lower')
-          console.log(item[`key${language}`][0])
+      } else if (item.changeable && bool === 0 && item.keyCode !== 'Language') {
           document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase() 
       }
     });
@@ -631,12 +640,12 @@ function addActionKeyDown(event) {
     changeCase(getCapsLock());
   } else if (event.key === 'Shift') {
     event.preventDefault();
-    modifyKeyboardShiftDown(event);
-  } else if (event.key === 'LeftCtrl' || event.key === 'RightCtrl') {
+    modifyKeyboardShiftDown(event, getCapsLock());
+  } else if (event.key === 'Control') {
     event.preventDefault();
   } else if (event.key === 'Alt') {
     event.preventDefault();
-    if (event.shifKey) {
+    if (event.shiftKey) {
       changeKeyboardLayout();
     }
   } else if (event.key === 'Enter') {
@@ -649,7 +658,7 @@ function addActionKeyUp(event) {
   document.querySelector(`#${event.code}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
   if (event.key === 'Shift') {
     event.preventDefault();
-    modifyKeyboardShiftUp(event);
+    modifyKeyboardShiftUp(event, getCapsLock());
   } else if (event.key === 'CapsLock') {
       if (getCapsLock()){
         document.querySelector('.attention').classList.remove('attention_disable')
@@ -734,7 +743,7 @@ function addActionMouseDown(event) {
       localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
       changeCase(getCapsLock());
     } else if (text === 'Shift') {
-      modifyKeyboardShiftDown(event);
+        modifyKeyboardShiftDown(event, getCapsLock());
     } else if (text === 'LeftCtrl' || text === 'RightCtrl') {
       // some code
     } else if (text === 'Alt') {
@@ -752,9 +761,10 @@ function addActionMouseDown(event) {
 }
 
 function addActionMouseUp(event) {
+    document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
     document.querySelector('.textarea').focus();
   if (event.target.innerText === 'Shift') {
-    // some code
+    modifyKeyboardShiftUp(event, getCapsLock());
   } else if (event.target.innerText === 'CapsLock') {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
     if (getCapsLock()){
