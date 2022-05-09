@@ -308,8 +308,8 @@ const KEYBOARD = {
         displayableText: true,
         changeable: true,
         keyCode: 'Backslash',
-        keyEn: ['\\', '|'], // SIC!
-        keyRu: ['\\', '/'], // SIC!
+        keyEn: ['\\', '|'],
+        keyRu: ['\\', '/'],
       },
       {
         displayableText: true,
@@ -468,7 +468,7 @@ const MAIN_ELEMENTS = [
   ['h1', 'title', 'Virtual Keyboard for Windows'],
   ['textarea', 'textarea', ''],
   ['div', 'keyboard', ''],
-  ['h2', 'information', 'Hotkeys for change language: Alt and Shift'],
+  ['h2', 'information', 'Hotkeys for change language: LeftAlt and LeftShift'],
   ['h2', 'attention attention_disable', 'Caps Lock is active'],
 ];
 
@@ -588,9 +588,7 @@ function modifyKeyboardShiftDown(event, bool) {
 }
 
 function modifyKeyboardShiftUp(event, bool) {
-  if (event.altKey) {
-    // Some action
-  } else {
+  if (!event.altKey) {
     const language = getLanguage();
     Object.values(KEYBOARD).forEach((keyboardItem) => {
       keyboardItem.forEach((item) => {
@@ -743,8 +741,6 @@ function addActionMouseDown(event) {
       changeCase(getCapsLock());
     } else if (text === 'Shift') {
       modifyKeyboardShiftDown(event, getCapsLock());
-    } else if (text === 'LeftCtrl' || text === 'RightCtrl') {
-      // some code
     } else if (text === 'Alt') {
       if (event.shifKey) {
         changeKeyboardLayout();
