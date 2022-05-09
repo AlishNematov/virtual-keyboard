@@ -559,9 +559,9 @@ function changeKeyboardLayout() {
     keyboardItem.forEach((element) => {
       if (element.changeable) {
         if (getCapsLock()) {
-            document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toUpperCase();
+          document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toUpperCase();
         } else {
-            document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toLowerCase();
+          document.querySelector(`#${element.keyCode}`).innerText = element[`key${language}`][0].toLowerCase();
         }
       }
     });
@@ -579,7 +579,7 @@ function modifyKeyboardShiftDown(event, bool) {
         if (item.changeable && bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
           document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][1].toLowerCase();
         } else if (item.changeable && !bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
-            document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][1].toUpperCase();
+          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][1].toUpperCase();
         }
       });
     });
@@ -595,10 +595,10 @@ function modifyKeyboardShiftUp(event, bool) {
     Object.values(KEYBOARD).forEach((keyboardItem) => {
       keyboardItem.forEach((item) => {
         if (item.changeable && bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
-            document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
-          } else if (item.changeable && !bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
-              document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
-          }
+          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
+        } else if (item.changeable && !bool && document.querySelector(`#${item.keyCode}`) !== 'Language') {
+          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
+        }
       });
     });
     document.querySelector('#Language').innerText = language.toUpperCase();
@@ -606,14 +606,13 @@ function modifyKeyboardShiftUp(event, bool) {
 }
 
 function changeCase(bool) {
-    console.log(bool)
   const language = getLanguage();
   Object.values(KEYBOARD).forEach((keyboardItem) => {
     keyboardItem.forEach((item) => {
       if (item.changeable && bool === 1 && item.keyCode !== 'Language') {
         document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
       } else if (item.changeable && bool === 0 && item.keyCode !== 'Language') {
-          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase() 
+        document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
       }
     });
   });
@@ -621,7 +620,7 @@ function changeCase(bool) {
 
 function addActionKeyDown(event) {
   document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
-  let text = document.querySelector(`#${event.code}`).innerText;
+  const text = document.querySelector(`#${event.code}`).innerText;
   if (event.key.length === 1 || event.key === 'Space') {
     event.preventDefault();
     addSubctring(text, getCursorPosition());
@@ -660,69 +659,69 @@ function addActionKeyUp(event) {
     event.preventDefault();
     modifyKeyboardShiftUp(event, getCapsLock());
   } else if (event.key === 'CapsLock') {
-      if (getCapsLock()){
-        document.querySelector('.attention').classList.remove('attention_disable')
-      } else {
-        document.querySelector('.attention').classList.add('attention_disable')
-      }
+    if (getCapsLock()) {
+      document.querySelector('.attention').classList.remove('attention_disable');
+    } else {
+      document.querySelector('.attention').classList.add('attention_disable');
+    }
   }
 }
 
-function changeCursorPosition(arrow, position) {
-    const textarea = document.querySelector('.textarea');
-    const text = textarea.value;
-    let [start, end] = position;
-    const rowNumber = Math.ceil(start/90);
-    if( start === end) {
-        if (arrow === '↑') {
-            let textRows = getRowsOfText(text.slice(0, start));
-            if( textRows.length > 1) {
-                if(textRows[textRows.length - 2].length < textRows[textRows.length - 1].length){
-                    textarea.setSelectionRange(start - textRows[textRows.length - 1].length, start - textRows[textRows.length - 1].length);
-                } else {
-                    start -= textRows[textRows.length - 2].length - !text.slice(0, start).includes('\n') ;
-                    textarea.setSelectionRange(start, start);
-                }
-            } else {
-                textarea.setSelectionRange(start - text.slice(0, start).length, start - text.slice(0, start).length);
-            }
-        } else if (arrow === '←') {
-            textarea.setSelectionRange(start - 1, start - 1);
-        } else if (arrow === '→') {
-            textarea.setSelectionRange(start + 1, start + 1);
-        } else if (arrow === '↓') {
-            let textRows = getRowsOfText(text.slice(0, start));
-            let naxRows = getRowsOfText(text);
-            console.log(textRows)
-            if( textRows.length < naxRows.length) {
-                textarea.setSelectionRange(start + 90, start + 90);
-            } else {
-                textarea.setSelectionRange(start + text.slice(0, start).length, start + text.slice(0, start).length);
-            }
-        }
+function getRowsOfText(text) {
+  const number = [];
+  text.split('\n').forEach((element) => {
+    const splitElement = element.split('');
+    if (splitElement.length > 90) {
+      while (splitElement.length > 90) {
+        number.push(splitElement.splice(0, 90).join(''));
+      }
+      number.push(splitElement.join(''));
     } else {
-        if (arrow === '←' || arrow === '↑') {
-            textarea.setSelectionRange(start, start);
-        } else if (arrow === '→' || arrow === '↓') {
-            textarea.setSelectionRange(end, end);
-        }
+      number.push(element);
     }
+  });
+  return number.map((element) => `${element}\n`);
 }
 
-function getRowsOfText(text) {
-    let number = []
-    text.split('\n').forEach(element => {
-        let splitElement = element.split('');
-        if(splitElement.length > 90) {
-            while(splitElement.length > 90) {
-                number.push(splitElement.splice(0, 90).join(''));
-            }
-            number.push(splitElement.join(''))
+function changeCursorPosition(arrow, position) {
+  const textarea = document.querySelector('.textarea');
+  const text = textarea.value;
+  const [start, end] = position;
+  let newStart = start;
+  if (start === end) {
+    if (arrow === '↑') {
+      const textRows = getRowsOfText(text.slice(0, start));
+      if (textRows.length > 1) {
+        if (textRows[textRows.length - 2].length < textRows[textRows.length - 1].length) {
+          const rowLength = textRows[textRows.length - 1].length;
+          textarea.setSelectionRange(start - rowLength, start - rowLength);
         } else {
-            number.push(element)
+          newStart -= textRows[textRows.length - 2].length - !text.slice(0, start).includes('\n');
+          textarea.setSelectionRange(newStart, newStart);
         }
-    })
-    return number.map(element => element += '\n');
+      } else {
+        const rowLength = text.slice(0, start).length;
+        textarea.setSelectionRange(start - rowLength, start - rowLength);
+      }
+    } else if (arrow === '←') {
+      textarea.setSelectionRange(start - 1, start - 1);
+    } else if (arrow === '→') {
+      textarea.setSelectionRange(start + 1, start + 1);
+    } else if (arrow === '↓') {
+      const textRows = getRowsOfText(text.slice(0, start));
+      const naxRows = getRowsOfText(text);
+      if (textRows.length < naxRows.length) {
+        textarea.setSelectionRange(start + 90, start + 90);
+      } else {
+        const rowLength = text.slice(0, start).length;
+        textarea.setSelectionRange(start + rowLength, start + rowLength);
+      }
+    }
+  } else if (arrow === '←' || arrow === '↑') {
+    textarea.setSelectionRange(start, start);
+  } else if (arrow === '→' || arrow === '↓') {
+    textarea.setSelectionRange(end, end);
+  }
 }
 
 function addActionMouseDown(event) {
@@ -731,7 +730,7 @@ function addActionMouseDown(event) {
     const arrows = ['↑', '←', '↓', '→'];
     document.querySelector('.textarea').focus();
     document.querySelector(`#${event.target.id}`).classList.add('keyboard__key_active', 'keyboard__key_click');
-    if (event.target.innerText.length === 1 && !arrows.includes(event.target.innerText) || event.target.id === 'Space') {
+    if ((event.target.innerText.length === 1 && !arrows.includes(event.target.innerText)) || event.target.id === 'Space') {
       addSubctring(text, getCursorPosition());
     } else if (text === 'Tab') {
       addSubctring('    ', getCursorPosition());
@@ -743,7 +742,7 @@ function addActionMouseDown(event) {
       localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
       changeCase(getCapsLock());
     } else if (text === 'Shift') {
-        modifyKeyboardShiftDown(event, getCapsLock());
+      modifyKeyboardShiftDown(event, getCapsLock());
     } else if (text === 'LeftCtrl' || text === 'RightCtrl') {
       // some code
     } else if (text === 'Alt') {
@@ -754,24 +753,24 @@ function addActionMouseDown(event) {
       addSubctring('\n', getCursorPosition());
     } else if (event.target.id === 'Language') {
       changeKeyboardLayout();
-    } else if (arrows.includes(event.target.innerText)){
+    } else if (arrows.includes(event.target.innerText)) {
       changeCursorPosition(event.target.innerText, getCursorPosition());
     }
   }
 }
 
 function addActionMouseUp(event) {
-    document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
-    document.querySelector('.textarea').focus();
+  document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+  document.querySelector('.textarea').focus();
   if (event.target.innerText === 'Shift') {
     modifyKeyboardShiftUp(event, getCapsLock());
   } else if (event.target.innerText === 'CapsLock') {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
-    if (getCapsLock()){
-        document.querySelector('.attention').classList.remove('attention_disable')
-      } else {
-        document.querySelector('.attention').classList.add('attention_disable')
-      }
+    if (getCapsLock()) {
+      document.querySelector('.attention').classList.remove('attention_disable');
+    } else {
+      document.querySelector('.attention').classList.add('attention_disable');
+    }
   } else {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
   }
