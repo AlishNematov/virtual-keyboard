@@ -617,50 +617,54 @@ function changeCase(bool) {
 }
 
 function addActionKeyDown(event) {
-  document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
-  const text = document.querySelector(`#${event.code}`).innerText;
-  if (event.key.length === 1 || event.key === 'Space') {
-    event.preventDefault();
-    addSubctring(text, getCursorPosition());
-  } else if (event.keyCode === 'Tab') {
-    event.preventDefault();
-    addSubctring('    ', getCursorPosition());
-  } else if (event.key === 'Backspace') {
-    event.preventDefault();
-    deleteSubstring('Backspace', getCursorPosition());
-  } else if (event.key === 'Delete') {
-    event.preventDefault();
-    deleteSubstring('Delete', getCursorPosition());
-  } else if (event.key === 'CapsLock') {
-    event.preventDefault();
-    localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
-    changeCase(getCapsLock());
-  } else if (event.key === 'Shift') {
-    event.preventDefault();
-    modifyKeyboardShiftDown(event, getCapsLock());
-  } else if (event.key === 'Control') {
-    event.preventDefault();
-  } else if (event.key === 'Alt') {
-    event.preventDefault();
-    if (event.shiftKey) {
-      changeKeyboardLayout();
+  if (document.querySelector(`#${event.code}`) !== null) {
+    document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
+    const text = document.querySelector(`#${event.code}`).innerText;
+    if (event.key.length === 1 || event.key === 'Space') {
+      event.preventDefault();
+      addSubctring(text, getCursorPosition());
+    } else if (event.keyCode === 'Tab') {
+      event.preventDefault();
+      addSubctring('    ', getCursorPosition());
+    } else if (event.key === 'Backspace') {
+      event.preventDefault();
+      deleteSubstring('Backspace', getCursorPosition());
+    } else if (event.key === 'Delete') {
+      event.preventDefault();
+      deleteSubstring('Delete', getCursorPosition());
+    } else if (event.key === 'CapsLock') {
+      event.preventDefault();
+      localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
+      changeCase(getCapsLock());
+    } else if (event.key === 'Shift') {
+      event.preventDefault();
+      modifyKeyboardShiftDown(event, getCapsLock());
+    } else if (event.key === 'Control') {
+      event.preventDefault();
+    } else if (event.key === 'Alt') {
+      event.preventDefault();
+      if (event.shiftKey) {
+        changeKeyboardLayout();
+      }
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      addSubctring('\n', getCursorPosition());
     }
-  } else if (event.key === 'Enter') {
-    event.preventDefault();
-    addSubctring('\n', getCursorPosition());
   }
 }
 
 function addActionKeyUp(event) {
-  document.querySelector(`#${event.code}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
-  if (event.key === 'Shift') {
-    event.preventDefault();
-    modifyKeyboardShiftUp(event, getCapsLock());
-  } else if (event.key === 'CapsLock') {
-    if (getCapsLock()) {
-      document.querySelector('.attention').classList.remove('attention_disable');
-    } else {
-      document.querySelector('.attention').classList.add('attention_disable');
+  if (document.querySelector(`#${event.code}`) !== null) {
+    document.querySelector(`#${event.code}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+    if (event.key === 'Shift') {
+      event.preventDefault();
+      modifyKeyboardShiftUp(event, getCapsLock());
+    } else if (event.key === 'CapsLock') {
+      if (getCapsLock()) {
+        document.querySelector('.attention').classList.remove('attention_disable');
+      } else {
+        document.querySelector('.attention').classList.add('attention_disable');
+      }
     }
   }
 }
