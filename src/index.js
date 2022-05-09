@@ -606,8 +606,10 @@ function changeCase(bool) {
   const language = getLanguage();
   Object.values(KEYBOARD).forEach((keyboardItem) => {
     keyboardItem.forEach((item) => {
-      if (item.changeable) {
-        document.querySelector(`#${item.keyCode}`).innerText = bool === 1 ? item[`key${language}`][0].toUpperCase() : item[`key${language}`][0].toLowerCase();
+      if (item.changeable && bool === 1) {
+        document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
+      } else if (item.changeable && bool === 0) {
+        item[`key${language}`][0].toUpperCase() 
       }
     });
   });
@@ -615,10 +617,11 @@ function changeCase(bool) {
 
 function addActionKeyDown(event) {
   document.querySelector(`#${event.code}`).classList.add('keyboard__key_active', 'keyboard__key_click');
+  let text = document.querySelector(`#${event.code}`).innerText;
   if (event.key.length === 1 || event.key === 'Space') {
     event.preventDefault();
-    addSubctring(event.key, getCursorPosition());
-  } else if (event.key === 'Tab') {
+    addSubctring(text, getCursorPosition());
+  } else if (event.keyCode === 'Tab') {
     event.preventDefault();
     addSubctring('    ', getCursorPosition());
   } else if (event.key === 'Backspace') {
@@ -655,7 +658,6 @@ function addActionKeyUp(event) {
     setCapsLock(event);
   }
 }
-// + text.slice(0, start).includes('\n')
 
 function changeCursorPosition(arrow, position) {
     const textarea = document.querySelector('.textarea');
