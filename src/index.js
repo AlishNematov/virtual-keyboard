@@ -485,6 +485,7 @@ function createMainElements(elementsArray) {
 
 function createKeyboardElements(keyboardArray, language = 'En') {
   const keyboard = document.querySelector('.keyboard');
+  localStorage.setItem('virtual_keyboard.capsLock', '0');
   Object.values(keyboardArray).forEach((keyboardElement, index) => {
     const row = document.createElement('div');
     row.className = `keyboard__row keyboard__row_${index}`;
@@ -508,15 +509,6 @@ function getLanguage() {
   localStorage.setItem('virtual_keyboard.language', 'En');
 
   return localStorage.getItem('virtual_keyboard.language');
-}
-
-function setCapsLock(event) {
-  localStorage.setItem('virtual_keyboard.capsLock', event.getModifierState('CapsLock') ? 1 : 0);
-  if (event.getModifierState('CapsLock')) {
-    document.querySelector('.attention').classList.remove('attention_disable');
-  } else {
-    document.querySelector('.attention').classList.add('attention_disable');
-  }
 }
 
 function getCapsLock() {
@@ -603,13 +595,16 @@ function modifyKeyboardShiftUp(event) {
 }
 
 function changeCase(bool) {
+    console.log(bool)
   const language = getLanguage();
   Object.values(KEYBOARD).forEach((keyboardItem) => {
     keyboardItem.forEach((item) => {
       if (item.changeable && bool === 1) {
-        document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase();
+        document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toUpperCase();
       } else if (item.changeable && bool === 0) {
-        item[`key${language}`][0].toUpperCase() 
+          console.log('lower')
+          console.log(item[`key${language}`][0])
+          document.querySelector(`#${item.keyCode}`).innerText = item[`key${language}`][0].toLowerCase() 
       }
     });
   });
@@ -632,6 +627,7 @@ function addActionKeyDown(event) {
     deleteSubstring('Delete', getCursorPosition());
   } else if (event.key === 'CapsLock') {
     event.preventDefault();
+    localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
     changeCase(getCapsLock());
   } else if (event.key === 'Shift') {
     event.preventDefault();
@@ -655,7 +651,11 @@ function addActionKeyUp(event) {
     event.preventDefault();
     modifyKeyboardShiftUp(event);
   } else if (event.key === 'CapsLock') {
-    setCapsLock(event);
+      if (getCapsLock()){
+        document.querySelector('.attention').classList.remove('attention_disable')
+      } else {
+        document.querySelector('.attention').classList.add('attention_disable')
+      }
   }
 }
 
@@ -731,6 +731,7 @@ function addActionMouseDown(event) {
     } else if (text === 'Delete') {
       deleteSubstring('Delete', getCursorPosition());
     } else if (text === 'CapsLock') {
+      localStorage.setItem('virtual_keyboard.capsLock', getCapsLock() ? 0 : 1);
       changeCase(getCapsLock());
     } else if (text === 'Shift') {
       modifyKeyboardShiftDown(event);
@@ -755,7 +756,12 @@ function addActionMouseUp(event) {
   if (event.target.innerText === 'Shift') {
     // some code
   } else if (event.target.innerText === 'CapsLock') {
-    setCapsLock(event);
+    document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
+    if (getCapsLock()){
+        document.querySelector('.attention').classList.remove('attention_disable')
+      } else {
+        document.querySelector('.attention').classList.add('attention_disable')
+      }
   } else {
     document.querySelector(`#${event.target.id}`).classList.remove('keyboard__key_active', 'keyboard__key_click');
   }
@@ -768,5 +774,4 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keyup', addActionKeyUp);
   document.querySelector('.keyboard').addEventListener('mousedown', addActionMouseDown);
   document.querySelector('.keyboard').addEventListener('mouseup', addActionMouseUp);
-  document.addEventListener('mousemove', setCapsLock);
 });
